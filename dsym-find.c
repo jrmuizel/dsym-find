@@ -28,6 +28,7 @@
 int main(int argc, char **argv) {
         if (argc < 2) {
                 printf("usage: dsym-find executable uuid\n");
+                printf("get the UUID from a binary with llvm-objdump -macho -private-headers [binary]\n");
                 exit(1);
         }
         char *path = argv[1];
@@ -38,7 +39,11 @@ int main(int argc, char **argv) {
         CFUUIDRef uuid = CFUUIDCreateFromString(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, argv[2], kCFStringEncodingMacRoman));
 
         CFURLRef dsym_url = DBGCopyFullDSYMURLForUUID(uuid, url);
-        char dsym_path[PATH_MAX];
-        CFURLGetFileSystemRepresentation(dsym_url, true, dsym_path, sizeof(dsym_path) - 1);
-        printf("path: %s\n", dsym_path);
+        if (dsym_url) {
+                char dsym_path[PATH_MAX];
+                CFURLGetFileSystemRepresentation(dsym_url, true, dsym_path, sizeof(dsym_path) - 1);
+                printf("path: %s\n", dsym_path);
+        } else {
+                printf("dsym not found\n");
+        }
 }
