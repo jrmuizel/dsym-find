@@ -20,3 +20,25 @@
       cmdsize 24
       uuid 20D9F286-538F-3A12-98E0-91379CB90844
 */
+#include <CoreFoundation/CoreFoundation.h>
+
+        CFURLRef DBGCopyFullDSYMURLForUUID(CFUUIDRef uuid, CFURLRef exec_url);
+        CFDictionaryRef DBGCopyDSYMPropertyLists(CFURLRef dsym_url);
+
+int main(int argc, char **argv) {
+        if (argc < 2) {
+                printf("usage: dsym-find executable uuid\n");
+                exit(1);
+        }
+        char *path = argv[1];
+        CFURLRef url = CFURLCreateFromFileSystemRepresentation(
+                                                NULL, (const UInt8 *)path, strlen(path),
+                                                FALSE
+                                               );
+        CFUUIDRef uuid = CFUUIDCreateFromString(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, argv[2], kCFStringEncodingMacRoman));
+
+        CFURLRef dsym_url = DBGCopyFullDSYMURLForUUID(uuid, url);
+        char dsym_path[PATH_MAX];
+        CFURLGetFileSystemRepresentation(dsym_url, true, dsym_path, sizeof(dsym_path) - 1);
+        printf("path: %s\n", dsym_path);
+}
